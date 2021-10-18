@@ -1,5 +1,5 @@
 /*
-Napisz instrukcję select tak aby wybrać numer zlecenia, datę zamówienia, numer klienta dla wszystkich
-niezrealizowanych jeszcze zleceń, dla których krajem odbiorcy jest Argentyna
+Wybierz nazwy i kraje wszystkich klientów, wyniki posortuj według kraju,
+w ramach danego kraju nazwy firm posortuj alfabetycznie
 */
-Select * from Orders where (ShippedDate is NULL or ShippedDate>getdate()) and ShipCountry='Argentina'
+Select CompanyName,Country from Customers order by Country,CompanyName
