@@ -1,2 +1,2 @@
-/*   Wybierz nazwy i ceny produktów o cenie jednostkowej pomiędzy 20 a 30 */
-Select ProductName,UnitPrice from Products where UnitPrice>20 and UnitPrice<30
+/*    Wybierz nazwy produktów których nie ma w magazynie */
+Select ProductName from Products where UnitsInStock=0

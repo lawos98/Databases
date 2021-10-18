@@ -1,2 +1,3 @@
-/*   Wybierz nazwy i ceny produktów o cenie jednostkowej pomiędzy 20 a 30 */
-Select ProductName,UnitPrice from Products where UnitPrice>20 and UnitPrice<30
+/*   Wybierz nazwy i ceny produktów z kategorii ‘meat’ */
+Select * from Categories where CategoryName LIKE '%Meat%'
+Select ProductName,UnitPrice from Products where CategoryID=6
