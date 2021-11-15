@@ -4,10 +4,10 @@
 
 
 
-Select (m1.lastname+' '+m1.firstname)as parent,
-       (m2.lastname+' '+m2.firstname)as child,
+Select (kids.lastname+' '+kids.firstname)as child,
+       (parent.lastname+' '+parent.firstname)as parent,
        j.birth_date,(a.city+' '+a.street+' '+a.zip) as Adress
-from member m1 cross join member m2
-    inner join juvenile j on m2.member_no=j.member_no
+from member kids
+    inner join juvenile j on kids.member_no=j.member_no
     inner join adult a on a.member_no = j.adult_member_no
-where j.adult_member_no=m1.member_no
+    inner join member parent on parent.member_no=j.adult_member_no
