@@ -3,5 +3,6 @@
 
 
 
-Select (B.LastName+' '+B.FirstName)from Employees as E
-    right join Employees B on E.ReportsTo=B.EmployeeID where E.ReportsTo is null
+Select (E.LastName+' '+E.FirstName) from Employees as E
+    left join Employees B on B.ReportsTo=E.EmployeeID where B.ReportsTo is null
+    
