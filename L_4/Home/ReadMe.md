@@ -126,3 +126,75 @@ SELECT (SELECT C.CategoryName FROM Categories AS C WHERE C.CategoryID = P.Catego
        P.UnitPrice - (SELECT AVG(P2.UnitPrice) FROM Products AS P2 WHERE P2.CategoryID = P.CategoryID) AS 'difference'
 FROM Products AS P
 ```
+
+## Slajd 4
+
+### Zad.1
+
+Podaj łączną wartość zamówienia o numerze 1025 (uwzględnij cenę za przesyłkę).
+
+``` sql
+SELECT O.Freight + (SELECT SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount))
+                    FROM [Order Details] AS OD
+                    WHERE OD.OrderID = O.OrderID GROUP BY OD.OrderID)
+FROM Orders AS O
+WHERE O.OrderID = 1025
+```
+
+### Zad.2
+
+Podaj łączną wartość zamówień każdego zamówienia (uwzględnij cenę za przesyłkę).
+
+
+``` sql
+SELECT O.OrderID,
+       O.Freight + (SELECT SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount))
+                    FROM [Order Details] AS OD
+                    WHERE OD.OrderID = O.OrderID GROUP BY OD.OrderID)
+FROM Orders AS O
+```
+
+### Zad.3
+
+Czy są jacyś klienci którzy nie złożyli żadnego zamówienia w 1997 roku, jeśli tak to pokaż ich dane adresow
+
+``` sql
+SELECT C.Address FROM Customers AS C
+WHERE C.CustomerID NOT IN (
+    SELECT O.CustomerID FROM Orders AS O WHERE year(O.OrderDate) = 1997)
+```
+
+### Zad.4
+
+Podaj produkty kupowane przez więcej niż jednego klienta
+
+``` sql
+select distinct P.ProductName from Products P
+     join [Order Details] OD on OD.ProductID = P.ProductID
+     join Orders O on OD.OrderID = O.OrderID
+ where exists
+     (select ProductID from [Order Details] OD join Orders O2 on OD.OrderID = O2.OrderID
+     where ProductID = P.ProductID and O2.CustomerID <> O.CustomerID)
+```
+
+``` sql
+select P.ProductName, count(*) from Products as p
+    inner join [Order Details] od on od.ProductID = p.ProductID
+    inner join Orders O on od.OrderID = O.OrderID
+group by p.ProductName
+having count(*) > 1
+```
+
+## Slajd 5
+
+### Zad.1
+
+Podaj łączną wartość zamówienia o numerze 1025 (uwzględnij cenę za przesyłkę).
+
+``` sql
+SELECT O.Freight + (SELECT SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount))
+                    FROM [Order Details] AS OD
+                    WHERE OD.OrderID = O.OrderID GROUP BY OD.OrderID)
+FROM Orders AS O
+WHERE O.OrderID = 1025
+```
