@@ -253,4 +253,62 @@ WHERE e.EmployeeID IN
 
 ``` sql
 SELECT E.FirstName + ' ' + E.LastName AS 'name',
+       round((SELECT SUM(OD.UnitPrice*od.quantity*(1-od.Discount))
+       from Orders AS O
+           INNER JOIN [Order Details] as OD ON O.OrderID = OD.OrderID
+       WHERE E.EmployeeID = O.EmployeeID)
+           +
+       (SELECT sum(O.Freight)
+       from Orders as o
+       WHERE o.EmployeeID = e.EmployeeID),2)
+FROM Employees AS E
+WHERE e.EmployeeID IN
+      (select distinct a.EmployeeID
+      from Employees as a
+          left join Employees as b on a.EmployeeID = b.ReportsTo)
+```
+
+### Zad.4
+
+Zmodyfikuj rozwiązania z pkt 3 tak aby dla pracowników pokazać jeszcze datę
+ostatnio obsłużonego zamówienia
+
+* którzy mają podwładnych
+
+``` sql
+SELECT E.FirstName + ' ' + E.LastName AS 'name',
+       round((SELECT SUM(OD.UnitPrice*od.quantity*(1-od.Discount))
+       from Orders AS O
+           INNER JOIN [Order Details] as OD ON O.OrderID = OD.OrderID
+       WHERE E.EmployeeID = O.EmployeeID)
+           +
+       (SELECT sum(O.Freight)
+       from Orders as o
+       WHERE o.EmployeeID = e.EmployeeID),2),
+       (Select top 1 O.OrderDate from Orders O where O.EmployeeID=E.EmployeeID order by 1 desc)
+FROM Employees AS E
+WHERE e.EmployeeID IN
+      (select distinct a.EmployeeID
+      from Employees as a
+          inner join Employees as b on a.EmployeeID = b.ReportsTo)
+```
+
+* którzy nie mają podwładnych
+
+``` sql
+SELECT E.FirstName + ' ' + E.LastName AS 'name',
+       round((SELECT SUM(OD.UnitPrice*od.quantity*(1-od.Discount))
+       from Orders AS O
+           INNER JOIN [Order Details] as OD ON O.OrderID = OD.OrderID
+       WHERE E.EmployeeID = O.EmployeeID)
+           +
+       (SELECT sum(O.Freight)
+       from Orders as o
+       WHERE o.EmployeeID = e.EmployeeID),2),
+       (Select top 1 O.OrderDate from Orders O where O.EmployeeID=E.EmployeeID order by 1 desc)
+FROM Employees AS E
+WHERE e.EmployeeID IN
+      (select distinct a.EmployeeID
+      from Employees as a
+          left join Employees as b on a.EmployeeID = b.ReportsTo)
 ```
