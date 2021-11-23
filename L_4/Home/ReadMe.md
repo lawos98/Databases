@@ -164,6 +164,14 @@ WHERE C.CustomerID NOT IN (
     SELECT O.CustomerID FROM Orders AS O WHERE year(O.OrderDate) = 1997)
 ```
 
+``` sql
+SELECT Distinct Address from Customers
+except
+SELECT Distinct Address from Customers
+    inner join Orders on Orders.CustomerID=Customers.CustomerID
+where year(OrderDate)=1997
+```
+
 ### Zad.4
 
 Podaj produkty kupowane przez więcej niż jednego klienta
@@ -189,12 +197,60 @@ having count(*) > 1
 
 ### Zad.1
 
-Podaj łączną wartość zamówienia o numerze 1025 (uwzględnij cenę za przesyłkę).
+Dla każdego pracownika (imię i nazwisko) podaj łączną wartość zamówień obsłużonych przez tego pracownika (przy obliczaniu wartości zamówień uwzględnij cenę za przesyłkę).
 
 ``` sql
-SELECT O.Freight + (SELECT SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount))
-                    FROM [Order Details] AS OD
-                    WHERE OD.OrderID = O.OrderID GROUP BY OD.OrderID)
-FROM Orders AS O
-WHERE O.OrderID = 1025
+SELECT E.FirstName + ' ' + E.LastName AS 'name',
+       round((SELECT SUM(OD.UnitPrice*od.quantity*(1-od.Discount))
+       from Orders AS O
+           INNER JOIN [Order Details] as OD ON O.OrderID = OD.OrderID
+       WHERE E.EmployeeID = O.EmployeeID)
+           +
+       (SELECT sum(O.Freight)
+       from Orders as o
+       WHERE o.EmployeeID = e.EmployeeID),2)
+FROM Employees AS E
+```
+
+### Zad.2
+
+Który z pracowników obsłużył najaktywniejszy (obsłużył zamówienia o największej wartości) w 1997r, podaj imię i nazwisko takiego pracownika).
+
+``` sql
+SELECT TOP 1 E.FirstName + ' ' + E.LastName as 'name',
+             (SELECT SUM(OD.UnitPrice*OD.quantity*(1-OD.Discount))
+             from Orders AS O
+                 INNER JOIN [Order Details] as OD ON O.OrderID = OD.OrderID
+             WHERE E.EmployeeID = O.EmployeeID AND year(O.ShippedDate) = 1997) AS 'price'
+FROM Employees E
+ORDER BY 2 DESC
+```
+
+### Zad.3
+
+Ogranicz wynik z pkt 1 tylko do pracowników
+
+* którzy mają podwładnych
+
+``` sql
+SELECT E.FirstName + ' ' + E.LastName AS 'name',
+       round((SELECT SUM(OD.UnitPrice*od.quantity*(1-od.Discount))
+       from Orders AS O
+           INNER JOIN [Order Details] as OD ON O.OrderID = OD.OrderID
+       WHERE E.EmployeeID = O.EmployeeID)
+           +
+       (SELECT sum(O.Freight)
+       from Orders as o
+       WHERE o.EmployeeID = e.EmployeeID),2)
+FROM Employees AS E
+WHERE e.EmployeeID IN
+      (select distinct a.EmployeeID
+      from Employees as a
+          inner join Employees as b on a.EmployeeID = b.ReportsTo)
+```
+
+* którzy nie mają podwładnych
+
+``` sql
+SELECT E.FirstName + ' ' + E.LastName AS 'name',
 ```
