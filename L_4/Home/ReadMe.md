@@ -73,13 +73,13 @@ Dla każdego produktu podaj maksymalną liczbę zamówionych jednostek.
 
 ``` sql
 SELECT P.ProductName,
-       (SELECT MAX(OD.Quantity)FROM [Order Details] OD WHERE OD.ProductID = P.ProductID) AS 'makslzj'
+       (SELECT MAX(OD.Quantity)FROM [Order Details] OD WHERE OD.ProductID = P.ProductID) AS 'max'
 FROM Products P
 ORDER BY P.ProductName
 ```
 
 ``` sql
-SELECT P.ProductName, MAX(OD.Quantity)FROM Products P
+SELECT P.ProductName, MAX(OD.Quantity) as 'max' FROM Products P
     INNER JOIN [Order Details] OD ON OD.ProductID = P.ProductID
 GROUP BY P.ProductName ORDER BY P.ProductName
 ```
@@ -100,7 +100,7 @@ Podaj wszystkie produkty których cena jest mniejsza niż średnia cena produktu
 ``` sql
 SELECT P.ProductID, P.ProductName FROM Products AS P
 WHERE P.UnitPrice < (SELECT AVG(UnitPrice) FROM Products AS P2
-WHERE P2.CategoryID = P.CategoryID)
+                    WHERE P2.CategoryID = P.CategoryID)
 ```
 ---
 ## Slajd 3
@@ -111,7 +111,7 @@ Dla każdego produktu podaj jego nazwę, cenę, średnią cenę wszystkich produ
 
 ``` sql
 SELECT P.ProductName, P.UnitPrice,(SELECT AVG(UnitPrice) FROM Products) AS 'averagePrice',
-       P.UnitPrice - (SELECT AVG(UnitPrice) FROM Products) AS 'difference'
+       P.UnitPrice - (SELECT AVG(UnitPrice) FROM Products) AS 'Difference'
 FROM Products AS P
 ```
 ---
@@ -123,7 +123,7 @@ Dla każdego produktu podaj jego nazwę kategorii, nazwę produktu, cenę, śred
 SELECT (SELECT C.CategoryName FROM Categories AS C WHERE C.CategoryID = P.CategoryID) AS 'CategoryName',
        P.ProductName, P.UnitPrice,
        (SELECT AVG(P2.UnitPrice) FROM Products AS P2 WHERE P2.CategoryID = P.CategoryID) AS 'AveragePriceByCategory',
-       P.UnitPrice - (SELECT AVG(P2.UnitPrice) FROM Products AS P2 WHERE P2.CategoryID = P.CategoryID) AS 'difference'
+       P.UnitPrice - (SELECT AVG(P2.UnitPrice) FROM Products AS P2 WHERE P2.CategoryID = P.CategoryID) AS 'Difference'
 FROM Products AS P
 ```
 ---
@@ -134,11 +134,11 @@ FROM Products AS P
 Podaj łączną wartość zamówienia o numerze 1025 (uwzględnij cenę za przesyłkę).
 
 ``` sql
-SELECT O.Freight + (SELECT SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount))
+SELECT round(O.Freight + (SELECT SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount))
                     FROM [Order Details] AS OD
-                    WHERE OD.OrderID = O.OrderID GROUP BY OD.OrderID)
+                    WHERE OD.OrderID = O.OrderID GROUP BY OD.OrderID),2) as 'Total Price'
 FROM Orders AS O
-WHERE O.OrderID = 1025
+WHERE O.OrderID = 10250
 ```
 ---
 ##### Zad.2
@@ -147,10 +147,9 @@ Podaj łączną wartość zamówień każdego zamówienia (uwzględnij cenę za 
 
 
 ``` sql
-SELECT O.OrderID,
-       O.Freight + (SELECT SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount))
+SELECT OrderID,round(O.Freight + (SELECT SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount))
                     FROM [Order Details] AS OD
-                    WHERE OD.OrderID = O.OrderID GROUP BY OD.OrderID)
+                    WHERE OD.OrderID = O.OrderID GROUP BY OD.OrderID),2) as 'Total Price'
 FROM Orders AS O
 ```
 ---
@@ -159,15 +158,15 @@ FROM Orders AS O
 Czy są jacyś klienci którzy nie złożyli żadnego zamówienia w 1997 roku, jeśli tak to pokaż ich dane adresow
 
 ``` sql
-SELECT C.Address FROM Customers AS C
+SELECT CompanyName,C.Address FROM Customers AS C
 WHERE C.CustomerID NOT IN (
     SELECT O.CustomerID FROM Orders AS O WHERE year(O.OrderDate) = 1997)
 ```
 
 ``` sql
-SELECT Distinct Address from Customers
+SELECT Distinct CompanyName,Address from Customers
 except
-SELECT Distinct Address from Customers
+SELECT Distinct CompanyName,Address from Customers
     inner join Orders on Orders.CustomerID=Customers.CustomerID
 where year(OrderDate)=1997
 ```
@@ -186,10 +185,10 @@ select distinct P.ProductName from Products P
 ```
 
 ``` sql
-select P.ProductName, count(*) from Products as p
-    inner join [Order Details] od on od.ProductID = p.ProductID
-    inner join Orders O on od.OrderID = O.OrderID
-group by p.ProductName
+select P.ProductName from Products as P
+    inner join [Order Details] OD on OD.ProductID = P.ProductID
+    inner join Orders O on OD.OrderID = O.OrderID
+group by P.ProductName
 having count(*) > 1
 ```
 ---
@@ -200,15 +199,15 @@ having count(*) > 1
 Dla każdego pracownika (imię i nazwisko) podaj łączną wartość zamówień obsłużonych przez tego pracownika (przy obliczaniu wartości zamówień uwzględnij cenę za przesyłkę).
 
 ``` sql
-SELECT E.FirstName + ' ' + E.LastName AS 'name',
-       round((SELECT SUM(OD.UnitPrice*od.quantity*(1-od.Discount))
+SELECT E.FirstName + ' ' + E.LastName AS 'Name',
+       round((SELECT SUM(OD.UnitPrice*OD.quantity*(1-OD.Discount))
        from Orders AS O
            INNER JOIN [Order Details] as OD ON O.OrderID = OD.OrderID
        WHERE E.EmployeeID = O.EmployeeID)
            +
        (SELECT sum(O.Freight)
-       from Orders as o
-       WHERE o.EmployeeID = e.EmployeeID),2)
+       from Orders as O
+       WHERE O.EmployeeID = e.EmployeeID),2) as 'TotalPrice'
 FROM Employees AS E
 ```
 ---
@@ -217,11 +216,11 @@ FROM Employees AS E
 Który z pracowników obsłużył najaktywniejszy (obsłużył zamówienia o największej wartości) w 1997r, podaj imię i nazwisko takiego pracownika).
 
 ``` sql
-SELECT TOP 1 E.FirstName + ' ' + E.LastName as 'name',
-             (SELECT SUM(OD.UnitPrice*OD.quantity*(1-OD.Discount))
+SELECT TOP 1 E.FirstName + ' ' + E.LastName as 'Name',
+             round((SELECT SUM(OD.UnitPrice*OD.quantity*(1-OD.Discount))
              from Orders AS O
                  INNER JOIN [Order Details] as OD ON O.OrderID = OD.OrderID
-             WHERE E.EmployeeID = O.EmployeeID AND year(O.ShippedDate) = 1997) AS 'price'
+             WHERE E.EmployeeID = O.EmployeeID AND year(O.ShippedDate) = 1997),2) AS 'TotalPrice'
 FROM Employees E
 ORDER BY 2 DESC
 ```
