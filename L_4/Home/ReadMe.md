@@ -2,7 +2,7 @@
 
 ## Slajd 1
 
-* 1 Wybierz nazwy i numery telefonów klientów , którym w 1997 roku przesyłki dostarczała firma United Package
+* 1. Wybierz nazwy i numery telefonów klientów , którym w 1997 roku przesyłki dostarczała firma United Package
 ``` sql
 SELECT DISTINCT C.CompanyName, C.Phone FROM Customers AS C
 WHERE C.CustomerID IN (
@@ -12,6 +12,23 @@ WHERE C.CustomerID IN (
  )
 ```
 
+``` sql
+SELECT DISTINCT Customers.CompanyName, Customers.Phone FROM Customers
+    INNER JOIN Orders O on Customers.CustomerID = O.CustomerID
+    INNER JOIN Shippers S on O.ShipVia = S.ShipperID
+WHERE year(ShippedDate) = 1997 AND S.CompanyName = 'United Package'
+
+```
+
+* 2. Wybierz nazwy i numery telefonów klientów , którym w 1997 roku przesyłki dostarczała firma United Package
+``` sql
+SELECT DISTINCT C.CompanyName, C.Phone FROM Customers AS C
+WHERE C.CustomerID IN (
+    SELECT DISTINCT O.CustomerID FROM Orders AS O WHERE year(O.ShippedDate) = 1997 AND O.ShipVia IN (
+        SELECT DISTINCT S.ShipperID FROM Shippers AS S WHERE S.CompanyName = 'United Package'
+        )
+ )
+```
 ## Zadania do wykonania
 
 1. Wykorzystaj definicje klas `Vector2d`, `MapDirection` oraz `MoveDirection` z laboratorium 2.
