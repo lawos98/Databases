@@ -8,9 +8,7 @@ Wybierz nazwy i numery telefonów klientów , którym w 1997 roku przesyłki dos
 SELECT DISTINCT C.CompanyName, C.Phone FROM Customers AS C
 WHERE C.CustomerID IN (
     SELECT DISTINCT O.CustomerID FROM Orders AS O WHERE year(O.ShippedDate) = 1997 AND O.ShipVia IN (
-        SELECT DISTINCT S.ShipperID FROM Shippers AS S WHERE S.CompanyName = 'United Package'
-        )
- )
+        SELECT DISTINCT S.ShipperID FROM Shippers AS S WHERE S.CompanyName = 'United Package'))
 ```
 
 ``` sql
@@ -21,50 +19,46 @@ WHERE year(ShippedDate) = 1997 AND S.CompanyName = 'United Package'
 
 ```
 
-* 2. Wybierz nazwy i numery telefonów klientów , którym w 1997 roku przesyłki dostarczała firma United Package
+### Zad.2
+Wybierz nazwy i numery telefonów klientów, którzy kupowali produkty z kategorii Confections.
 ``` sql
 SELECT DISTINCT C.CompanyName, C.Phone FROM Customers AS C
 WHERE C.CustomerID IN (
-    SELECT DISTINCT O.CustomerID FROM Orders AS O WHERE year(O.ShippedDate) = 1997 AND O.ShipVia IN (
-        SELECT DISTINCT S.ShipperID FROM Shippers AS S WHERE S.CompanyName = 'United Package'
-        )
- )
+ SELECT O.CustomerID FROM Orders AS O WHERE O.OrderID IN (
+     SELECT OD.OrderID FROM [Order Details] AS OD WHERE OD.ProductID IN (
+         SELECT P.ProductID FROM Products AS P WHERE P.CategoryID IN (
+             SELECT CAT.CategoryID FROM Categories as CAT where CAT.CategoryName = 'Confections'))))
 ```
-## Zadania do wykonania
 
-1. Wykorzystaj definicje klas `Vector2d`, `MapDirection` oraz `MoveDirection` z laboratorium 2.
-8. Utwórz klasę `Animal`, która:
-   * określa początkową orientację zwierzęcia jako `NORTH`,
-   * określa początkowe położenie zwierzęcia na mapie jako `Vector2d(2,2)` (przyjmij, że zwierzę znajduje się w
-     pierwszej ćwiartce układu współrzędnych, a północ jest tożsama z kierunkiem wyznaczanym przez rosnące wartości na
-     osi OY),
-   * definiuje metodę `toString()`, która w reprezentacji łańcuchowej zawiera informacje o położeniu zwierzęcia (pozycję
-     oraz orientację),
-   * definiuje metodą `boolean isAt(Vector2d position)`, która zwraca prawdę, jeśli zwierzę znajduje się na pozycji `position`.
-   * definuje swoje pola jako prywatne.
-9. Utwórz lub zmodyfikuj klasę `World`, która w metodzie `main` stworzy zwierzę i wyświetli w konsoli jego pozycję.
-10. Dodaj do klasy `Animal` metodę `move(MoveDirection direction)`, która:
-   * Dla kierunków `RIGHT` i `LEFT` zmienia orientację zwierzęcia na mapie, np. kiedy zwierzę jest w pozycji `NORTH` a
-     zmiana kierunku to `RIGHT` to orientacja zwierzęcia powinna wynosić `EAST`.
-   * Dla kierunków `FORWARD` i `BACKWARD` zmienia pozycję zwierzęcia o 1 pole, uwzględniając jego orientację, np. kiedy zwierzę
-     jest na pozycji `(2,2)` i jego orientacja to `NORTH`, to po ruchu `FORWARD` jego pozycja to `(2,3)`.
-   * **Uniemożliwia** wyjechanie poza mapę, która ustalona jest od pozycji `(0,0)` do pozycji `(4,4)` (pięć na pięć pól). W
-     sytuacji, w której zwierzę miałoby wyjść poza mapę, wywołanie `move` nie ma żadnego skutku.
-5. W metodzie `main` dodaj wywołania, które przetestują poprawność implementacji, np. po ciągu wywołań: `RIGHT, FORWARD,
-   FORWARD, FORWARD` pozycja zwierzęcia powinna wynosić `(4,2)` a orientacja `EAST`.
-6. Utwórz klasę `OptionsParser` a w niej metodę `parse`, która:
-   * akceptuje tablicę łańcuchów znaków,
-   * zwraca tablicę kierunków ruchu `MoveDirection`,
-   * zamienia łańcuchy `f` oraz `forward` na kierunek `MoveDirection.FORWARD`, `b` oraz `backward` na kierunek
-     `MoveDirection.BACKWARD`, itd.
-   * dla nieznanych kierunków nie umieszcza ich w tablicy wynikowej (tablica wynikowa powinna zawierać wyłącznie prawidłowe kierunki).
-7. Zmodyfikuj metodę `main` tak, aby korzystając z klasy `OptionsParser` umożliwiała sterowanie zwierzęciem.
-8. Przetestuj zachowanie zwierzęcia dla różnych danych wejściowych.
-9. Napisz testy integracyjne weryfiujące poprawność implementacji. Uwzględnij:
-    * czy zwierzę ma właściwą orientację,
-    * czy zwierzę przemieszcza się na właściwe pozycje,
-    * czy zwierzę nie wychodzi poza mapę,
-    * czy dane wejściowe podane jako tablica łańcuchów znaków są poprawnie interpretowane.
-10. Odpowiedz na pytanie: jak zaimplementować mechanizm, który wyklucza pojawienie się dwóch zwierząt w tym samym
-    miejscu.
-11. Otaguj gotowe rozwiązanie jako lab3.
+``` sql
+SELECT DISTINCT C.CompanyName, C.Phone FROM Customers AS C
+    INNER JOIN Orders O on C.CustomerID = O.CustomerID
+    INNER JOIN [Order Details] OD on OD.OrderID = O.OrderID
+    INNER JOIN Products P on OD.ProductID = P.ProductID
+    INNER JOIN Categories C2 on P.CategoryID = C2.CategoryID
+WHERE C2.CategoryName = 'Confections';
+
+```
+
+### Zad.3
+Wybierz nazwy i numery telefonów klientów, którzy nie kupowali produktów z kategorii Confections.
+``` sql
+SELECT DISTINCT C.CompanyName, C.Phone FROM Customers AS C
+WHERE NOT EXISTS (
+    SELECT O.CustomerID FROM Orders O WHERE O.CustomerID = C.CustomerID AND
+        EXISTS(SELECT D.OrderID FROM [Order Details] D WHERE D.OrderID =O.OrderID AND
+                EXISTS(SELECT P.ProductID FROM Products P WHERE P.ProductID =D.ProductID AND
+                        EXISTS(SELECT C2.CategoryID FROM Categories C2
+                        WHERE C2.CategoryID =P.CategoryID AND C2.CategoryName = 'Confections'))))
+```
+
+``` sql
+SELECT DISTINCT Cus2.CompanyName, Cus2.Phone FROM Customers AS C
+    INNER JOIN Orders O on C.CustomerID = O.CustomerID
+    INNER JOIN [Order Details] OD on OD.OrderID = O.OrderID
+    INNER JOIN Products P on OD.ProductID = P.ProductID
+    INNER JOIN Categories C2 on P.CategoryID = C2.CategoryID and C2.CategoryName = 'Confections'
+    right outer join Customers as cus2 on cus2.CustomerID = C.CustomerID where C.CustomerID is null;
+
+
+```
