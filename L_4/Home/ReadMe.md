@@ -2,7 +2,7 @@
 
 ## Slajd 1
 
-### Zad.1
+##### Zad.1
 
 Wybierz nazwy i numery telefonów klientów , którym w 1997 roku przesyłki dostarczała firma United Package.
 
@@ -20,7 +20,7 @@ SELECT DISTINCT Customers.CompanyName, Customers.Phone FROM Customers
 WHERE year(ShippedDate) = 1997 AND S.CompanyName = 'United Package'
 ```
 ---
-### Zad.2
+##### Zad.2
 
 Wybierz nazwy i numery telefonów klientów, którzy kupowali produkty z kategorii Confections.
 
@@ -42,7 +42,7 @@ SELECT DISTINCT C.CompanyName, C.Phone FROM Customers AS C
 WHERE C2.CategoryName = 'Confections';
 ```
 ---
-### Zad.3
+##### Zad.3
 
 Wybierz nazwy i numery telefonów klientów, którzy nie kupowali produktów z kategorii Confections.
 
@@ -67,7 +67,7 @@ SELECT DISTINCT Cus2.CompanyName, Cus2.Phone FROM Customers AS C
 ---
 ## Slajd 2
 
-### Zad.1
+##### Zad.1
 
 Dla każdego produktu podaj maksymalną liczbę zamówionych jednostek.
 
@@ -84,7 +84,7 @@ SELECT P.ProductName, MAX(OD.Quantity)FROM Products P
 GROUP BY P.ProductName ORDER BY P.ProductName
 ```
 ---
-### Zad.2
+##### Zad.2
 
 Podaj wszystkie produkty których cena jest mniejsza niż średnia cena produktu.
 
@@ -93,7 +93,7 @@ SELECT P.ProductName, P.UnitPrice FROM Products P
 WHERE P.UnitPrice < (SELECT AVG(UnitPrice) FROM Products)
 ```
 ---
-### Zad.3
+##### Zad.3
 
 Podaj wszystkie produkty których cena jest mniejsza niż średnia cena produktu danej kategorii.
 
@@ -105,7 +105,7 @@ WHERE P2.CategoryID = P.CategoryID)
 ---
 ## Slajd 3
 
-### Zad.1
+##### Zad.1
 
 Dla każdego produktu podaj jego nazwę, cenę, średnią cenę wszystkich produktów oraz różnicę między ceną produktu a średnią ceną wszystkich produktów.
 
@@ -115,7 +115,7 @@ SELECT P.ProductName, P.UnitPrice,(SELECT AVG(UnitPrice) FROM Products) AS 'aver
 FROM Products AS P
 ```
 ---
-### Zad.2
+##### Zad.2
 
 Dla każdego produktu podaj jego nazwę kategorii, nazwę produktu, cenę, średnią cenę wszystkich produktów danej kategorii oraz różnicę między ceną produktu a średnią ceną wszystkich produktów danej kategori
 
@@ -129,7 +129,7 @@ FROM Products AS P
 ---
 ## Slajd 4
 
-### Zad.1
+##### Zad.1
 
 Podaj łączną wartość zamówienia o numerze 1025 (uwzględnij cenę za przesyłkę).
 
@@ -141,7 +141,7 @@ FROM Orders AS O
 WHERE O.OrderID = 1025
 ```
 ---
-### Zad.2
+##### Zad.2
 
 Podaj łączną wartość zamówień każdego zamówienia (uwzględnij cenę za przesyłkę).
 
@@ -154,7 +154,7 @@ SELECT O.OrderID,
 FROM Orders AS O
 ```
 ---
-### Zad.3
+##### Zad.3
 
 Czy są jacyś klienci którzy nie złożyli żadnego zamówienia w 1997 roku, jeśli tak to pokaż ich dane adresow
 
@@ -172,7 +172,7 @@ SELECT Distinct Address from Customers
 where year(OrderDate)=1997
 ```
 ---
-### Zad.4
+##### Zad.4
 
 Podaj produkty kupowane przez więcej niż jednego klienta
 
@@ -195,7 +195,7 @@ having count(*) > 1
 ---
 ## Slajd 5
 
-### Zad.1
+##### Zad.1
 
 Dla każdego pracownika (imię i nazwisko) podaj łączną wartość zamówień obsłużonych przez tego pracownika (przy obliczaniu wartości zamówień uwzględnij cenę za przesyłkę).
 
@@ -212,7 +212,7 @@ SELECT E.FirstName + ' ' + E.LastName AS 'name',
 FROM Employees AS E
 ```
 ---
-### Zad.2
+##### Zad.2
 
 Który z pracowników obsłużył najaktywniejszy (obsłużył zamówienia o największej wartości) w 1997r, podaj imię i nazwisko takiego pracownika).
 
@@ -226,7 +226,7 @@ FROM Employees E
 ORDER BY 2 DESC
 ```
 ---
-### Zad.3
+##### Zad.3
 
 Ogranicz wynik z pkt 1 tylko do pracowników
 
@@ -268,7 +268,7 @@ WHERE e.EmployeeID IN
           left join Employees as b on a.EmployeeID = b.ReportsTo)
 ```
 ---
-### Zad.4
+##### Zad.4
 
 Zmodyfikuj rozwiązania z pkt 3 tak aby dla pracowników pokazać jeszcze datę
 ostatnio obsłużonego zamówienia
