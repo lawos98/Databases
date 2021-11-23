@@ -19,7 +19,7 @@ SELECT DISTINCT Customers.CompanyName, Customers.Phone FROM Customers
     INNER JOIN Shippers S on O.ShipVia = S.ShipperID
 WHERE year(ShippedDate) = 1997 AND S.CompanyName = 'United Package'
 ```
-
+---
 ### Zad.2
 
 Wybierz nazwy i numery telefonów klientów, którzy kupowali produkty z kategorii Confections.
@@ -41,7 +41,7 @@ SELECT DISTINCT C.CompanyName, C.Phone FROM Customers AS C
     INNER JOIN Categories C2 on P.CategoryID = C2.CategoryID
 WHERE C2.CategoryName = 'Confections';
 ```
-
+---
 ### Zad.3
 
 Wybierz nazwy i numery telefonów klientów, którzy nie kupowali produktów z kategorii Confections.
@@ -64,7 +64,7 @@ SELECT DISTINCT Cus2.CompanyName, Cus2.Phone FROM Customers AS C
     INNER JOIN Categories C2 on P.CategoryID = C2.CategoryID and C2.CategoryName = 'Confections'
     right outer join Customers as cus2 on cus2.CustomerID = C.CustomerID where C.CustomerID is null;
 ```
-
+---
 ## Slajd 2
 
 ### Zad.1
@@ -83,7 +83,7 @@ SELECT P.ProductName, MAX(OD.Quantity)FROM Products P
     INNER JOIN [Order Details] OD ON OD.ProductID = P.ProductID
 GROUP BY P.ProductName ORDER BY P.ProductName
 ```
-
+---
 ### Zad.2
 
 Podaj wszystkie produkty których cena jest mniejsza niż średnia cena produktu.
@@ -92,7 +92,7 @@ Podaj wszystkie produkty których cena jest mniejsza niż średnia cena produktu
 SELECT P.ProductName, P.UnitPrice FROM Products P
 WHERE P.UnitPrice < (SELECT AVG(UnitPrice) FROM Products)
 ```
-
+---
 ### Zad.3
 
 Podaj wszystkie produkty których cena jest mniejsza niż średnia cena produktu danej kategorii.
@@ -102,7 +102,7 @@ SELECT P.ProductID, P.ProductName FROM Products AS P
 WHERE P.UnitPrice < (SELECT AVG(UnitPrice) FROM Products AS P2
 WHERE P2.CategoryID = P.CategoryID)
 ```
-
+---
 ## Slajd 3
 
 ### Zad.1
@@ -114,7 +114,7 @@ SELECT P.ProductName, P.UnitPrice,(SELECT AVG(UnitPrice) FROM Products) AS 'aver
        P.UnitPrice - (SELECT AVG(UnitPrice) FROM Products) AS 'difference'
 FROM Products AS P
 ```
-
+---
 ### Zad.2
 
 Dla każdego produktu podaj jego nazwę kategorii, nazwę produktu, cenę, średnią cenę wszystkich produktów danej kategorii oraz różnicę między ceną produktu a średnią ceną wszystkich produktów danej kategori
@@ -126,7 +126,7 @@ SELECT (SELECT C.CategoryName FROM Categories AS C WHERE C.CategoryID = P.Catego
        P.UnitPrice - (SELECT AVG(P2.UnitPrice) FROM Products AS P2 WHERE P2.CategoryID = P.CategoryID) AS 'difference'
 FROM Products AS P
 ```
-
+---
 ## Slajd 4
 
 ### Zad.1
@@ -140,7 +140,7 @@ SELECT O.Freight + (SELECT SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount))
 FROM Orders AS O
 WHERE O.OrderID = 1025
 ```
-
+---
 ### Zad.2
 
 Podaj łączną wartość zamówień każdego zamówienia (uwzględnij cenę za przesyłkę).
@@ -153,7 +153,7 @@ SELECT O.OrderID,
                     WHERE OD.OrderID = O.OrderID GROUP BY OD.OrderID)
 FROM Orders AS O
 ```
-
+---
 ### Zad.3
 
 Czy są jacyś klienci którzy nie złożyli żadnego zamówienia w 1997 roku, jeśli tak to pokaż ich dane adresow
@@ -171,7 +171,7 @@ SELECT Distinct Address from Customers
     inner join Orders on Orders.CustomerID=Customers.CustomerID
 where year(OrderDate)=1997
 ```
-
+---
 ### Zad.4
 
 Podaj produkty kupowane przez więcej niż jednego klienta
@@ -192,7 +192,7 @@ select P.ProductName, count(*) from Products as p
 group by p.ProductName
 having count(*) > 1
 ```
-
+---
 ## Slajd 5
 
 ### Zad.1
@@ -211,7 +211,7 @@ SELECT E.FirstName + ' ' + E.LastName AS 'name',
        WHERE o.EmployeeID = e.EmployeeID),2)
 FROM Employees AS E
 ```
-
+---
 ### Zad.2
 
 Który z pracowników obsłużył najaktywniejszy (obsłużył zamówienia o największej wartości) w 1997r, podaj imię i nazwisko takiego pracownika).
@@ -225,7 +225,7 @@ SELECT TOP 1 E.FirstName + ' ' + E.LastName as 'name',
 FROM Employees E
 ORDER BY 2 DESC
 ```
-
+---
 ### Zad.3
 
 Ogranicz wynik z pkt 1 tylko do pracowników
@@ -267,7 +267,7 @@ WHERE e.EmployeeID IN
       from Employees as a
           left join Employees as b on a.EmployeeID = b.ReportsTo)
 ```
-
+---
 ### Zad.4
 
 Zmodyfikuj rozwiązania z pkt 3 tak aby dla pracowników pokazać jeszcze datę
