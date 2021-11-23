@@ -3,7 +3,9 @@
 ## Slajd 1
 
 ### Zad.1
-Wybierz nazwy i numery telefonów klientów , którym w 1997 roku przesyłki dostarczała firma United Package
+
+Wybierz nazwy i numery telefonów klientów , którym w 1997 roku przesyłki dostarczała firma United Package.
+
 ``` sql
 SELECT DISTINCT C.CompanyName, C.Phone FROM Customers AS C
 WHERE C.CustomerID IN (
@@ -16,11 +18,12 @@ SELECT DISTINCT Customers.CompanyName, Customers.Phone FROM Customers
     INNER JOIN Orders O on Customers.CustomerID = O.CustomerID
     INNER JOIN Shippers S on O.ShipVia = S.ShipperID
 WHERE year(ShippedDate) = 1997 AND S.CompanyName = 'United Package'
-
 ```
 
 ### Zad.2
+
 Wybierz nazwy i numery telefonów klientów, którzy kupowali produkty z kategorii Confections.
+
 ``` sql
 SELECT DISTINCT C.CompanyName, C.Phone FROM Customers AS C
 WHERE C.CustomerID IN (
@@ -37,11 +40,12 @@ SELECT DISTINCT C.CompanyName, C.Phone FROM Customers AS C
     INNER JOIN Products P on OD.ProductID = P.ProductID
     INNER JOIN Categories C2 on P.CategoryID = C2.CategoryID
 WHERE C2.CategoryName = 'Confections';
-
 ```
 
 ### Zad.3
+
 Wybierz nazwy i numery telefonów klientów, którzy nie kupowali produktów z kategorii Confections.
+
 ``` sql
 SELECT DISTINCT C.CompanyName, C.Phone FROM Customers AS C
 WHERE NOT EXISTS (
@@ -59,6 +63,66 @@ SELECT DISTINCT Cus2.CompanyName, Cus2.Phone FROM Customers AS C
     INNER JOIN Products P on OD.ProductID = P.ProductID
     INNER JOIN Categories C2 on P.CategoryID = C2.CategoryID and C2.CategoryName = 'Confections'
     right outer join Customers as cus2 on cus2.CustomerID = C.CustomerID where C.CustomerID is null;
+```
 
+## Slajd 2
 
+### Zad.1
+
+Dla każdego produktu podaj maksymalną liczbę zamówionych jednostek.
+
+``` sql
+SELECT P.ProductName,
+       (SELECT MAX(OD.Quantity)FROM [Order Details] OD WHERE OD.ProductID = P.ProductID) AS 'makslzj'
+FROM Products P
+ORDER BY P.ProductName
+```
+
+``` sql
+SELECT P.ProductName, MAX(OD.Quantity)FROM Products P
+    INNER JOIN [Order Details] OD ON OD.ProductID = P.ProductID
+GROUP BY P.ProductName ORDER BY P.ProductName
+```
+
+### Zad.2
+
+Podaj wszystkie produkty których cena jest mniejsza niż średnia cena produktu.
+
+``` sql
+SELECT P.ProductName, P.UnitPrice FROM Products P
+WHERE P.UnitPrice < (SELECT AVG(UnitPrice) FROM Products)
+```
+
+### Zad.3
+
+Podaj wszystkie produkty których cena jest mniejsza niż średnia cena produktu danej kategorii.
+
+``` sql
+SELECT P.ProductID, P.ProductName FROM Products AS P
+WHERE P.UnitPrice < (SELECT AVG(UnitPrice) FROM Products AS P2
+WHERE P2.CategoryID = P.CategoryID)
+```
+
+## Slajd 3
+
+### Zad.1
+
+Dla każdego produktu podaj jego nazwę, cenę, średnią cenę wszystkich produktów oraz różnicę między ceną produktu a średnią ceną wszystkich produktów.
+
+``` sql
+SELECT P.ProductName, P.UnitPrice,(SELECT AVG(UnitPrice) FROM Products) AS 'averagePrice',
+       P.UnitPrice - (SELECT AVG(UnitPrice) FROM Products) AS 'difference'
+FROM Products AS P
+```
+
+### Zad.2
+
+Dla każdego produktu podaj jego nazwę kategorii, nazwę produktu, cenę, średnią cenę wszystkich produktów danej kategorii oraz różnicę między ceną produktu a średnią ceną wszystkich produktów danej kategori
+
+``` sql
+SELECT (SELECT C.CategoryName FROM Categories AS C WHERE C.CategoryID = P.CategoryID) AS 'CategoryName',
+       P.ProductName, P.UnitPrice,
+       (SELECT AVG(P2.UnitPrice) FROM Products AS P2 WHERE P2.CategoryID = P.CategoryID) AS 'AveragePriceByCategory',
+       P.UnitPrice - (SELECT AVG(P2.UnitPrice) FROM Products AS P2 WHERE P2.CategoryID = P.CategoryID) AS 'difference'
+FROM Products AS P
 ```
