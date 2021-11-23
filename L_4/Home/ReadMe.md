@@ -2,7 +2,8 @@
 
 ## Slajd 1
 
-* 1. Wybierz nazwy i numery telefonów klientów , którym w 1997 roku przesyłki dostarczała firma United Package
+### Zad.1
+* Wybierz nazwy i numery telefonów klientów , którym w 1997 roku przesyłki dostarczała firma United Package
 ``` sql
 SELECT DISTINCT C.CompanyName, C.Phone FROM Customers AS C
 WHERE C.CustomerID IN (
