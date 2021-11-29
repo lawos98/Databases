@@ -1,4 +1,4 @@
-# Laboratorium 3 -Zadania Domowe
+# Laboratorium 3 -Zadania
 
 ## Slajd 1
 
@@ -7,7 +7,8 @@
 Wybierz nazwy i ceny produktów (baza northwind) o cenie jednostkowej pomiędzy 20.00 a 30.00, dla każdego produktu podaj dane adresowe dostawcy
 
 ``` sql
-Select ProductName,UnitPrice,S.Address from Products JOIN Suppliers S on S.SupplierID = Products.SupplierID where UnitPrice BETWEEN 20 and 30
+Select ProductName,UnitPrice,S.Address from Products JOIN Suppliers S on S.SupplierID = Products.SupplierID
+where UnitPrice BETWEEN 20 and 30
 ```
 
 ---
@@ -16,7 +17,8 @@ Select ProductName,UnitPrice,S.Address from Products JOIN Suppliers S on S.Suppl
 Wybierz nazwy produktów oraz inf. o stanie magazynu dla produktów dostarczanych przez firmę ‘Tokyo Traders’
 
 ``` sql
-Select ProductName,UnitsInStock from Products JOIN Suppliers S on S.SupplierID = Products.SupplierID where S.CompanyName='Tokyo Traders'
+Select ProductName,UnitsInStock from Products JOIN Suppliers S on S.SupplierID = Products.SupplierID
+where S.CompanyName='Tokyo Traders'
 ```
 
 ---
@@ -65,7 +67,8 @@ Select t.title from loan inner join title t on loan.title_no = t.title_no group 
 Podaj informacje o karach zapłaconych za przetrzymywanie książki o tytule ‘Tao Teh King’. Interesuje nas data oddania książki, ile dni była przetrzymywana i jaką zapłacono karę
 
 ``` sql
-Select in_date,DATEDIFF(day,out_date,in_date),fine_paid from loanhist inner join title t on loanhist.title_no = t.title_no where t.title='Tao Teh King'
+Select in_date,DATEDIFF(day,out_date,in_date),fine_paid from loanhist inner join title t on loanhist.title_no = t.title_no
+where t.title='Tao Teh King'
 ```
 ---
 ### Zad.4
