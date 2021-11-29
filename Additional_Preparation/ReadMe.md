@@ -64,11 +64,23 @@ Select S.CompanyName,Year(O.OrderDate) as YEAR,MONTH(O.OrderDate) as MONTH,SUM(F
 group by S.CompanyName,Year(O.OrderDate),MONTH(O.OrderDate)
 ```
 
-### Zad.4
+### Zad.5
 
-Wypisać ceny produktów, których cena jednostkowa jest nie mniejsza od średniej ceny produktów tej samej kategorii 
+Wypisać ceny produktów, których cena jednostkowa jest nie mniejsza od średniej ceny produktów tej samej kategorii
 
 ``` sql
 Select P.ProductName,P.UnitPrice from Products P
 where P.UnitPrice<(Select AVG(P2.UnitPrice) from Products P2 where P2.CategoryID=P.CategoryID)
+```
+
+### Zad.5
+
+Wybierz nazwy i numery telefonów klientów, którzy nie kupili żadnego produktu z kategorii ‘Confections’. Rozwiązać używając mechanizmu podzapytań.
+
+``` sql
+Select C.CompanyName,C.Phone from Customers C where C.CustomerID not in (
+    Select O.CustomerID from Orders O where O.OrderID in(
+        Select OD.OrderID from [Order Details] OD where OD.ProductID in(
+            Select P.ProductID from Products P where P.CategoryID in(
+                Select Ca.CategoryID from Categories Ca where Ca.CategoryName='Confections'))))
 ```
