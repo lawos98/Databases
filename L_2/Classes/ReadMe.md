@@ -1,4 +1,4 @@
-# Laboratorium 2 -Zadania Domowe
+# Laboratorium 2 -Zadania
 
 ## Slajd 1
 

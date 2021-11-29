@@ -1,313 +1,280 @@
-# Laboratorium 4 -Zadania Domowe
+# Laboratorium 3 -Zadania Domowe
 
 ## Slajd 1
 
-##### Zad.1
+### Zad.1
 
-Wybierz nazwy i numery telefonów klientów , którym w 1997 roku przesyłki dostarczała firma United Package.
+Wybierz nazwy i ceny produktów (baza northwind) o cenie jednostkowej pomiędzy 20.00 a 30.00, dla każdego produktu podaj dane adresowe dostawcy
 
 ``` sql
-SELECT DISTINCT C.CompanyName, C.Phone FROM Customers AS C
-WHERE C.CustomerID IN (
-    SELECT DISTINCT O.CustomerID FROM Orders AS O WHERE year(O.ShippedDate) = 1997 AND O.ShipVia IN (
-        SELECT DISTINCT S.ShipperID FROM Shippers AS S WHERE S.CompanyName = 'United Package'))
+Select ProductName,UnitPrice,S.Address from Products JOIN Suppliers S on S.SupplierID = Products.SupplierID where UnitPrice BETWEEN 20 and 30
 ```
 
+---
+### Zad.2
+
+Wybierz nazwy produktów oraz inf. o stanie magazynu dla produktów dostarczanych przez firmę ‘Tokyo Traders’
+
 ``` sql
-SELECT DISTINCT Customers.CompanyName, Customers.Phone FROM Customers
-    INNER JOIN Orders O on Customers.CustomerID = O.CustomerID
-    INNER JOIN Shippers S on O.ShipVia = S.ShipperID
-WHERE year(ShippedDate) = 1997 AND S.CompanyName = 'United Package'
+Select ProductName,UnitsInStock from Products JOIN Suppliers S on S.SupplierID = Products.SupplierID where S.CompanyName='Tokyo Traders'
+```
+
+---
+### Zad.3
+
+czy są jacyś klienci którzy nie złożyli żadnego zamówienia w 1997 roku, jeśli tak to pokaż ich dane adresowe
+
+``` sql
+Select Orders.CustomerID,YEar(OrderDate) from Customers
+      left join Orders on Customers.CustomerID = Orders.CustomerID
+where not (YEAR(OrderDate)=1997 or OrderDate is NULL)
 ```
 ---
-##### Zad.2
+### Zad.4
 
-Wybierz nazwy i numery telefonów klientów, którzy kupowali produkty z kategorii Confections.
-
-``` sql
-SELECT DISTINCT C.CompanyName, C.Phone FROM Customers AS C
-WHERE C.CustomerID IN (
- SELECT O.CustomerID FROM Orders AS O WHERE O.OrderID IN (
-     SELECT OD.OrderID FROM [Order Details] AS OD WHERE OD.ProductID IN (
-         SELECT P.ProductID FROM Products AS P WHERE P.CategoryID IN (
-             SELECT CAT.CategoryID FROM Categories as CAT where CAT.CategoryName = 'Confections'))))
-```
+Wybierz nazwy i numery telefonów dostawców, dostarczających produkty,których aktualnie nie ma w magazynie
 
 ``` sql
-SELECT DISTINCT C.CompanyName, C.Phone FROM Customers AS C
-    INNER JOIN Orders O on C.CustomerID = O.CustomerID
-    INNER JOIN [Order Details] OD on OD.OrderID = O.OrderID
-    INNER JOIN Products P on OD.ProductID = P.ProductID
-    INNER JOIN Categories C2 on P.CategoryID = C2.CategoryID
-WHERE C2.CategoryName = 'Confections';
-```
----
-##### Zad.3
-
-Wybierz nazwy i numery telefonów klientów, którzy nie kupowali produktów z kategorii Confections.
-
-``` sql
-SELECT DISTINCT C.CompanyName, C.Phone FROM Customers AS C
-WHERE NOT EXISTS (
-    SELECT O.CustomerID FROM Orders O WHERE O.CustomerID = C.CustomerID AND
-        EXISTS(SELECT D.OrderID FROM [Order Details] D WHERE D.OrderID =O.OrderID AND
-                EXISTS(SELECT P.ProductID FROM Products P WHERE P.ProductID =D.ProductID AND
-                        EXISTS(SELECT C2.CategoryID FROM Categories C2
-                        WHERE C2.CategoryID =P.CategoryID AND C2.CategoryName = 'Confections'))))
+Select Orders.CustomerID,YEar(OrderDate) from Customers
+      left join Orders on Customers.CustomerID = Orders.CustomerID
+where not (YEAR(OrderDate)=1997 or OrderDate is NULL)
 ```
 
-``` sql
-SELECT DISTINCT Cus2.CompanyName, Cus2.Phone FROM Customers AS C
-    INNER JOIN Orders O on C.CustomerID = O.CustomerID
-    INNER JOIN [Order Details] OD on OD.OrderID = O.OrderID
-    INNER JOIN Products P on OD.ProductID = P.ProductID
-    INNER JOIN Categories C2 on P.CategoryID = C2.CategoryID and C2.CategoryName = 'Confections'
-    right outer join Customers as cus2 on cus2.CustomerID = C.CustomerID where C.CustomerID is null;
-```
----
 ## Slajd 2
 
-##### Zad.1
+---
+### Zad.1
 
-Dla każdego produktu podaj maksymalną liczbę zamówionych jednostek.
+Napisz polecenie, które wyświetla listę dzieci będących członkami biblioteki (baza library). Interesuje nas imię, nazwisko i data urodzenia dziecka.
 
 ``` sql
-SELECT P.ProductName,
-       (SELECT MAX(OD.Quantity)FROM [Order Details] OD WHERE OD.ProductID = P.ProductID) AS 'max'
-FROM Products P
-ORDER BY P.ProductName
+Select firstname,lastname,j.birth_date from member inner join juvenile j on member.member_no = j.member_no
 ```
 
+---
+### Zad.2
+
+Napisz polecenie, które podaje tytuły aktualnie wypożyczonych książek
+
 ``` sql
-SELECT P.ProductName, MAX(OD.Quantity) as 'max' FROM Products P
-    INNER JOIN [Order Details] OD ON OD.ProductID = P.ProductID
-GROUP BY P.ProductName ORDER BY P.ProductName
+Select t.title from loan inner join title t on loan.title_no = t.title_no group by t.title
 ```
 ---
-##### Zad.2
+### Zad.3
 
-Podaj wszystkie produkty których cena jest mniejsza niż średnia cena produktu.
+Podaj informacje o karach zapłaconych za przetrzymywanie książki o tytule ‘Tao Teh King’. Interesuje nas data oddania książki, ile dni była przetrzymywana i jaką zapłacono karę
 
 ``` sql
-SELECT P.ProductName, P.UnitPrice FROM Products P
-WHERE P.UnitPrice < (SELECT AVG(UnitPrice) FROM Products)
+Select in_date,DATEDIFF(day,out_date,in_date),fine_paid from loanhist inner join title t on loanhist.title_no = t.title_no where t.title='Tao Teh King'
 ```
 ---
-##### Zad.3
+### Zad.4
 
-Podaj wszystkie produkty których cena jest mniejsza niż średnia cena produktu danej kategorii.
+Napisz polecenie które podaje listę książek (mumery ISBN) zarezerwowanych przez osobę o nazwisku: Stephen A. Graff
 
 ``` sql
-SELECT P.ProductID, P.ProductName FROM Products AS P
-WHERE P.UnitPrice < (SELECT AVG(UnitPrice) FROM Products AS P2
-                    WHERE P2.CategoryID = P.CategoryID)
+Select isbn,lastname from reservation inner join member m on reservation.member_no = m.member_no where
+firstname = 'Stephen' and lastname ='Graff' and middleinitial='A'
 ```
 ---
 ## Slajd 3
 
-##### Zad.1
+---
+### Zad.1
 
-Dla każdego produktu podaj jego nazwę, cenę, średnią cenę wszystkich produktów oraz różnicę między ceną produktu a średnią ceną wszystkich produktów.
+Wybierz nazwy i ceny produktów (baza northwind) o cenie jednostkowej pomiędzy 20.00 a 30.00, dla każdego produktu podaj dane adresowe dostawcy, interesują nas tylko produkty z kategorii ‘Meat/Poultry’
 
 ``` sql
-SELECT P.ProductName, P.UnitPrice,(SELECT AVG(UnitPrice) FROM Products) AS 'averagePrice',
-       P.UnitPrice - (SELECT AVG(UnitPrice) FROM Products) AS 'Difference'
-FROM Products AS P
+Select ProductName,UnitPrice,S.Address from Products
+    inner JOIN Suppliers S on S.SupplierID = Products.SupplierID
+    inner join Categories C on Products.CategoryID = C.CategoryID
+where (UnitPrice BETWEEN 20 and 30) and C.CategoryName='Meat/Poultry'
+```
+
+---
+### Zad.2
+
+Wybierz nazwy i ceny produktów z kategorii ‘Confections’ dla każdego produktu podaj nazwę dostawcy.
+
+``` sql
+Select ProductName,UnitPrice,S.CompanyName from Products
+    inner JOIN Suppliers S on S.SupplierID = Products.SupplierID
+    inner join Categories C on Products.CategoryID = C.CategoryID
+where C.CategoryName='Confections'
 ```
 ---
-##### Zad.2
+### Zad.3
 
-Dla każdego produktu podaj jego nazwę kategorii, nazwę produktu, cenę, średnią cenę wszystkich produktów danej kategorii oraz różnicę między ceną produktu a średnią ceną wszystkich produktów danej kategori
+Wybierz nazwy i numery telefonów klientów , którym w 1997 roku przesyłki dostarczała firma ‘United Package’
 
 ``` sql
-SELECT (SELECT C.CategoryName FROM Categories AS C WHERE C.CategoryID = P.CategoryID) AS 'CategoryName',
-       P.ProductName, P.UnitPrice,
-       (SELECT AVG(P2.UnitPrice) FROM Products AS P2 WHERE P2.CategoryID = P.CategoryID) AS 'AveragePriceByCategory',
-       P.UnitPrice - (SELECT AVG(P2.UnitPrice) FROM Products AS P2 WHERE P2.CategoryID = P.CategoryID) AS 'Difference'
-FROM Products AS P
+Select Customers.CompanyName,Customers.Phone from Customers
+    inner join Orders O on Customers.CustomerID = O.CustomerID
+    inner join Shippers S on O.ShipVia = S.ShipperID
+where YEAR(O.ShippedDate)=1997 and S.CompanyName='United Package'
+```
+---
+### Zad.4
+
+Wybierz nazwy i numery telefonów klientów, którzy kupowali produkty z kategorii ‘Confections’
+
+``` sql
+Select CompanyName,Phone from Customers
+    left join Orders O on Customers.CustomerID = O.CustomerID
+    left join [Order Details] OD on O.OrderID = OD.OrderID
+    left join Products P on P.ProductID=OD.ProductID
+    left join Categories C on P.CategoryID = C.CategoryID
+where C.CategoryName='Confections'
+group by CompanyName, Phone
 ```
 ---
 ## Slajd 4
 
-##### Zad.1
-
-Podaj łączną wartość zamówienia o numerze 1025 (uwzględnij cenę za przesyłkę).
-
-``` sql
-SELECT round(O.Freight + (SELECT SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount))
-                    FROM [Order Details] AS OD
-                    WHERE OD.OrderID = O.OrderID GROUP BY OD.OrderID),2) as 'Total Price'
-FROM Orders AS O
-WHERE O.OrderID = 10250
-```
 ---
-##### Zad.2
+### Zad.1
 
-Podaj łączną wartość zamówień każdego zamówienia (uwzględnij cenę za przesyłkę).
-
+Napisz polecenie, które wyświetla listę dzieci będących członkami biblioteki (baza library). Interesuje nas imię, nazwisko, data urodzenia dziecka i adres zamieszkania dziecka.
 
 ``` sql
-SELECT OrderID,round(O.Freight + (SELECT SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount))
-                    FROM [Order Details] AS OD
-                    WHERE OD.OrderID = O.OrderID GROUP BY OD.OrderID),2) as 'Total Price'
-FROM Orders AS O
+Select firstname,lastname,j.birth_date,(a.city+' '+a.street+' '+a.zip)
+from member
+    inner join juvenile j on member.member_no = j.member_no
+    inner join adult a on a.member_no = j.adult_member_no
 ```
+
 ---
-##### Zad.3
+### Zad.2
 
-Czy są jacyś klienci którzy nie złożyli żadnego zamówienia w 1997 roku, jeśli tak to pokaż ich dane adresow
-
-``` sql
-SELECT CompanyName,C.Address FROM Customers AS C
-WHERE C.CustomerID NOT IN (
-    SELECT O.CustomerID FROM Orders AS O WHERE year(O.OrderDate) = 1997)
-```
+Napisz polecenie, które wyświetla listę dzieci będących członkami biblioteki (baza library). Interesuje nas imię, nazwisko, data urodzenia dziecka, adres zamieszkania dziecka oraz imię i nazwisko rodzica.
 
 ``` sql
-SELECT Distinct CompanyName,Address from Customers
-except
-SELECT Distinct CompanyName,Address from Customers
-    inner join Orders on Orders.CustomerID=Customers.CustomerID
-where year(OrderDate)=1997
-```
----
-##### Zad.4
-
-Podaj produkty kupowane przez więcej niż jednego klienta
-
-``` sql
-select distinct P.ProductName from Products P
-     join [Order Details] OD on OD.ProductID = P.ProductID
-     join Orders O on OD.OrderID = O.OrderID
- where exists
-     (select ProductID from [Order Details] OD join Orders O2 on OD.OrderID = O2.OrderID
-     where ProductID = P.ProductID and O2.CustomerID <> O.CustomerID)
-```
-
-``` sql
-select P.ProductName from Products as P
-    inner join [Order Details] OD on OD.ProductID = P.ProductID
-    inner join Orders O on OD.OrderID = O.OrderID
-group by P.ProductName
-having count(*) > 1
+Select (kids.lastname+' '+kids.firstname)as child,
+       (parent.lastname+' '+parent.firstname)as parent,
+       j.birth_date,(a.city+' '+a.street+' '+a.zip) as Adress
+from member kids
+    inner join juvenile j on kids.member_no=j.member_no
+    inner join adult a on a.member_no = j.adult_member_no
+    inner join member parent on parent.member_no=j.adult_member_no
 ```
 ---
 ## Slajd 5
 
-##### Zad.1
+---
+### Zad.1
 
-Dla każdego pracownika (imię i nazwisko) podaj łączną wartość zamówień obsłużonych przez tego pracownika (przy obliczaniu wartości zamówień uwzględnij cenę za przesyłkę).
+Napisz polecenie, które wyświetla pracowników oraz ich podwładnych (baza northwind)
 
 ``` sql
-SELECT E.FirstName + ' ' + E.LastName AS 'Name',
-       round((SELECT SUM(OD.UnitPrice*OD.quantity*(1-OD.Discount))
-       from Orders AS O
-           INNER JOIN [Order Details] as OD ON O.OrderID = OD.OrderID
-       WHERE E.EmployeeID = O.EmployeeID)
-           +
-       (SELECT sum(O.Freight)
-       from Orders as O
-       WHERE O.EmployeeID = e.EmployeeID),2) as 'TotalPrice'
-FROM Employees AS E
+Select (E.LastName+' '+E.FirstName) as emp,(B.LastName+' '+B.FirstName)as boss from Employees as E
+    inner join Employees B on E.ReportsTo=B.EmployeeID
+```
+
+---
+### Zad.2
+
+Napisz polecenie, które wyświetla pracowników oraz ich podwładnych (baza northwind)
+
+``` sql
+Select (E.LastName+' '+E.FirstName) from Employees as E
+    left join Employees B on B.ReportsTo=E.EmployeeID where B.ReportsTo is null
 ```
 ---
-##### Zad.2
+### Zad.3
 
-Który z pracowników obsłużył najaktywniejszy (obsłużył zamówienia o największej wartości) w 1997r, podaj imię i nazwisko takiego pracownika).
+Napisz polecenie, które wyświetla adresy członków biblioteki, którzy mają dzieci urodzone przed 1 stycznia 1996
 
 ``` sql
-SELECT TOP 1 E.FirstName + ' ' + E.LastName as 'Name',
-             round((SELECT SUM(OD.UnitPrice*OD.quantity*(1-OD.Discount))
-             from Orders AS O
-                 INNER JOIN [Order Details] as OD ON O.OrderID = OD.OrderID
-             WHERE E.EmployeeID = O.EmployeeID AND year(O.ShippedDate) = 1997),2) AS 'TotalPrice'
-FROM Employees E
-ORDER BY 2 DESC
+Select (a.city+' '+a.street+' '+a.zip) as A
+from member kids
+    inner join juvenile j on kids.member_no=j.member_no
+    inner join adult a on a.member_no = j.adult_member_no
+    inner join member parent on parent.member_no=j.adult_member_no
+where YEAR(j.birth_date)<1996
+```
+
+---
+### Zad.4
+
+Napisz polecenie, które wyświetla adresy członków biblioteki, którzy mają dzieci urodzone przed 1 stycznia 1996. Interesują nas tylko adresy takich członków biblioteki, którzy aktualnie nie przetrzymują książek.
+
+``` sql
+Select (a.city+' '+a.street+' '+a.zip),j.birth_date as A
+from member kids
+    join juvenile j on kids.member_no=j.member_no
+    join adult a on a.member_no = j.adult_member_no
+    join member parent on parent.member_no=j.adult_member_no
+    left join loan on parent.member_no=loan.member_no
+where YEAR(j.birth_date)<1996 and (loan.member_no is null or due_date>GETDATE())
 ```
 ---
-##### Zad.3
+## Slajd 6
 
-Ogranicz wynik z pkt 1 tylko do pracowników
+---
+### Zad.1
 
-* którzy mają podwładnych
+Napisz polecenie które zwraca imię i nazwisko (jako pojedynczą kolumnę – name), oraz informacje o adresie: ulica, miasto, stan kod (jako pojedynczą kolumnę – address) dla wszystkich dorosłych członków biblioteki
 
 ``` sql
-SELECT E.FirstName + ' ' + E.LastName AS 'Name',
-       round((SELECT SUM(OD.UnitPrice*OD.quantity*(1-OD.Discount))
-       from Orders AS O
-           INNER JOIN [Order Details] as OD ON O.OrderID = OD.OrderID
-       WHERE E.EmployeeID = O.EmployeeID)
-           +
-       (SELECT sum(O.Freight)
-       from Orders as O
-       WHERE O.EmployeeID = e.EmployeeID),2) as 'TotalPrice'
-FROM Employees AS E
-WHERE e.EmployeeID IN
-      (select distinct a.EmployeeID
-      from Employees as a
-          inner join Employees as b on a.EmployeeID = b.ReportsTo)
+SELECT CONCAT(firstname,' ', lastname) AS name,
+       CONCAT(street,' ', city,' ', zip,' ', state) AS address
+FROM adult
+JOIN member m ON adult.member_no = m.member_no
 ```
 
-* którzy nie mają podwładnych
+---
+### Zad.2
+
+Napisz polecenie, które zwraca: isbn, copy_no, on_loan, title, translation, cover, dla książek o isbn 1, 500 i 1000. Wynik posortuj wg ISBN
 
 ``` sql
-SELECT E.FirstName + ' ' + E.LastName AS 'Name',
-       round((SELECT SUM(OD.UnitPrice*OD.quantity*(1-OD.Discount))
-       from Orders AS O
-           INNER JOIN [Order Details] as OD ON O.OrderID = OD.OrderID
-       WHERE E.EmployeeID = O.EmployeeID)
-           +
-       (SELECT sum(O.Freight)
-       from Orders as O
-       WHERE O.EmployeeID = e.EmployeeID),2) as 'TotalPrice'
-FROM Employees AS E
-WHERE e.EmployeeID IN
-      (select distinct a.EmployeeID
-      from Employees as a
-          left join Employees as b on a.EmployeeID = b.ReportsTo)
+Select i.isbn,c.copy_no,c.on_loan,t.title,i.translation,i.cover from title t
+    inner join item i on t.title_no = i.title_no
+    inner join copy c on i.isbn = c.isbn
+where i.isbn in (1,500,1000)
+order by i.isbn
 ```
 ---
-##### Zad.4
+### Zad.3
 
-Zmodyfikuj rozwiązania z pkt 3 tak aby dla pracowników pokazać jeszcze datę
-ostatnio obsłużonego zamówienia
-
-* którzy mają podwładnych
+Napisz polecenie które zwraca o użytkownikach biblioteki o nr 250, 342, i 1675 (dla każdego użytkownika: nr, imię i nazwisko członka biblioteki), oraz informację o zarezerwowanych książkach (isbn, data)
 
 ``` sql
-SELECT E.FirstName + ' ' + E.LastName AS 'Name',
-       round((SELECT SUM(OD.UnitPrice*OD.quantity*(1-OD.Discount))
-       from Orders AS O
-           INNER JOIN [Order Details] as OD ON O.OrderID = OD.OrderID
-       WHERE E.EmployeeID = O.EmployeeID)
-           +
-       (SELECT sum(O.Freight)
-       from Orders as O
-       WHERE O.EmployeeID = e.EmployeeID),2) as 'TotalPrice',
-       (Select top 1 O.OrderDate from Orders O where O.EmployeeID=E.EmployeeID order by 1 desc) as 'LastOrder'
-FROM Employees AS E
-WHERE e.EmployeeID IN
-      (select distinct a.EmployeeID
-      from Employees as a
-          left join Employees as b on a.EmployeeID = b.ReportsTo)
+SELECT m.member_no, firstname, lastname, isbn, log_date
+FROM member m
+JOIN reservation r ON m.member_no = r.member_no
+WHERE m.member_no IN (250, 342, 1675)
 ```
 
-* którzy nie mają podwładnych
+---
+### Zad.4
+
+Dodaj listę członków biblioteki mieszkających w Arizonie (AZ) mają więcej niż dwoje dzieci zapisanych do biblioteki
 
 ``` sql
-SELECT E.FirstName + ' ' + E.LastName AS 'Name',
-       round((SELECT SUM(OD.UnitPrice*OD.quantity*(1-OD.Discount))
-       from Orders AS O
-           INNER JOIN [Order Details] as OD ON O.OrderID = OD.OrderID
-       WHERE E.EmployeeID = O.EmployeeID)
-           +
-       (SELECT sum(O.Freight)
-       from Orders as O
-       WHERE O.EmployeeID = e.EmployeeID),2) as 'TotalPrice',
-       (Select top 1 O.OrderDate from Orders O where O.EmployeeID=E.EmployeeID order by 1 desc) as 'LastOrder'
-FROM Employees AS E
-WHERE e.EmployeeID IN
-      (select distinct a.EmployeeID
-      from Employees as a
-          INNER join Employees as b on a.EmployeeID = b.ReportsTo)
+SELECT a.member_no
+FROM adult a
+    JOIN juvenile j ON a.member_no = j.adult_member_no
+    JOIN member m ON a.member_no = m.member_no
+WHERE state = 'AZ'
+GROUP BY a.member_no
+HAVING COUNT(*) > 2
 ```
+---
+## Slajd 7
+
+---
+### Zad.1
+
+Podaj listę członków biblioteki mieszkających w Arizonie (AZ) którzy mają więcej niż dwoje dzieci zapisanych do biblioteki oraz takich którzy mieszkają w Kaliforni (CA) i mają więcej niż troje dzieci zapisanych do bibliotek
+
+``` sql
+SELECT a.member_no
+FROM adult a
+JOIN juvenile j ON a.member_no = j.adult_member_no
+JOIN member m ON a.member_no = m.member_no
+GROUP BY a.member_no, state
+HAVING (state = 'AZ' AND COUNT(*) > 2) OR
+       (state = 'CA' AND COUNT(*) > 3)
+```
+
+---
