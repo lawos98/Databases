@@ -1,7 +1,7 @@
 # Laboratorium 4 -Zadania Domowe
 
 ## Slajd 1
-<div style="color:red;">bobo</div>
+<spam style="color:red;">bobo</spam>
 ### Zad.1
 
 Podaj liczbę produktów o cenach mniejszych niż 10$ lub większych niż 20$.
